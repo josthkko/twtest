@@ -160,7 +160,7 @@ while true do
 				last_tweet = twClient.user_timeline(twUser.to_i,{:count => 1}).to_a
 				posted_at = last_tweet[0].created_at.to_date
 				diff = (Date.today - posted_at).to_i
-				if diff < 3
+				if diff < 5
 					twClient.follow!(twUser.to_i)
 					puts "followed #{twUser}"
 					redis.srem(twName, twUser)
@@ -194,7 +194,7 @@ while true do
 	num_old_follows = redis.zrangebyscore("followed", 0, Time.now.to_i - (3*24*60*60)).count
 	puts "#{num_old_follows} follows more than 3 days old found"
 	unfollowed_today = redis.zrangebyscore("unfollowed", Time.now.to_i - (24*60*60), Time.now.to_i).count
-	puts "#Unfollowed today: {unfollowed_today}"
+	puts "Unfollowed today: #{}{unfollowed_today}"
 	#the unfollowing part
 	if unfollowed_today < 40
 		#get people we are actually following
@@ -234,7 +234,7 @@ while true do
 
 	puts "total followed today #{followed_today}"
 	puts "total unfollowed today #{unfollowed_today}"
-	sleep Random.new.rand(300..400) #3600 + Random.new.rand(300..1800)
+	sleep Random.new.rand(900..1800) #3600 + Random.new.rand(300..1800)
 
 	if Time.now.to_i - 24*60*60 > start_time
 		followed_today = 0
