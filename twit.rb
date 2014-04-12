@@ -194,7 +194,8 @@ while true do
 	num_old_follows = redis.zrangebyscore("followed", 0, Time.now.to_i - (3*24*60*60)).count
 	puts "#{num_old_follows} follows more than 3 days old found"
 	unfollowed_today = redis.zrangebyscore("unfollowed", Time.now.to_i - (24*60*60), Time.now.to_i).count
-
+	puts "#Unfollowed today: {unfollowed_today}"
+	#the unfollowing part
 	if unfollowed_today < 40
 		#get people we are actually following
 		redis.smembers("my_friends").each do |twUser|
@@ -212,7 +213,7 @@ while true do
 			if !redis.sismember("my_followers", twUser)
 				twClient.unfollow(twUser.to_i)
 				puts "unfollowed #{twUser}"
-				#num_unfollowed += 1
+				num_unfollowed += 1
 				redis.zrem("followed", twUser)
 				redis.zadd("unfollowed", Time.now.to_i, twUser)
 				sleep 80 + Random.new.rand(10..30)
