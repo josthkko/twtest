@@ -217,6 +217,8 @@ while true do
 				redis.zrem("followed", twUser)
 				redis.zadd("unfollowed", Time.now.to_i, twUser)
 				sleep 80 + Random.new.rand(10..30)
+			else
+				puts "#{twUser} is my follower and I won't unfollow him"
 			end
 
 			#TODO unfollow only some percentage of folks
