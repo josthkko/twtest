@@ -139,6 +139,11 @@ while true do
 	if !intersect_arr.empty?
 		redis.srem(twName, intersect_arr)
 	end
+	#remove users that we have already followed at some point
+	intersect_arr = redis.sinter(twName, "followed_archive")
+	if !intersect_arr.empty?
+		redis.srem(twName, intersect_arr)
+	end
 
 	#puts "List of target users"
 	#puts redis.smembers("tw_targets")
@@ -155,11 +160,13 @@ while true do
 				last_tweet = twClient.user_timeline(twUser.to_i,{:count => 1}).to_a
 				posted_at = last_tweet[0].created_at.to_date
 				diff = (Date.today - posted_at).to_i
-				if diff < 2
+				if diff < 3
 					twClient.follow!(twUser.to_i)
 					puts "followed #{twUser}"
 					redis.srem(twName, twUser)
 					redis.zadd("followed", Time.now.to_i, twUser)
+					#add to archive of all follows, so we don't follow and unfollow a user twice
+					redis.zadd("followed_archive", Time.now.to_i, twUser)
 					#num_added += 1
 					sleep 80 + Random.new.rand(10..30)
 				end
