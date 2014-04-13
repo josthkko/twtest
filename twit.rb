@@ -183,6 +183,9 @@ while true do
 				end
 			rescue Twitter::Error::Unauthorized => error
 				puts error
+				redis.srem(twName, twUser)
+				redis.sadd(twName + "_inactive", twUser)
+				puts "moved #{twUser} to #{twName}_inactive list"
 			rescue Twitter::Error::TooManyRequests => error
 				puts error
 				sleep error.rate_limit.reset_in
@@ -190,6 +193,9 @@ while true do
 				puts error
 			rescue NoMethodError => error
 				puts error
+				redis.srem(twName, twUser)
+				redis.sadd(twName + "_inactive", twUser)
+				puts "moved #{twUser} to #{twName}_inactive list"
 			end
 
 			#TODO add according to number of followers/following
