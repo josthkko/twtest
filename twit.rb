@@ -126,6 +126,7 @@ while true do
 	redis = redis_client
 	twClient = twitter_client
 	
+	redis.sadd("followed_archive", "0000000")
 	#redis.del("followed_archive")
 	#exit
 	#puts redis.zrange("followed", 0, -1, :with_scores => true)
@@ -170,7 +171,7 @@ while true do
 					redis.srem(twName, twUser)
 					redis.zadd("followed", Time.now.to_i, twUser)
 					#add to archive of all follows, so we don't follow and unfollow a user twice
-					redis.sadd("followed_archive", Time.now.to_i, twUser)
+					redis.sadd("followed_archive", twUser)
 					#num_added += 1
 					sleep 80 + Random.new.rand(10..30)
 				end
