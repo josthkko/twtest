@@ -247,12 +247,14 @@ while true do
 			puts "favorited!"
 			sleep Random.new.rand(1..4)
 		end
+		sleep 5
 	else
 		puts "favourite limit reached for 24h!"
 	end
-
+	puts "---------------------------------------------------------------"
 	puts "total followed today #{followed_today}"
 	puts "total unfollowed today #{unfollowed_today}"
+	puts "total favorited today #{favorited_today}"
 	sleep Random.new.rand(900..1800) #3600 + Random.new.rand(300..1800)
 
 	if Time.now.to_i - 24*60*60 > start_time
