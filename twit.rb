@@ -183,11 +183,11 @@ while true do
 				end
 			rescue Twitter::Error::Unauthorized => error
 				puts error
-			rescue Twitter::Error => error
-				puts error
 			rescue Twitter::Error::TooManyRequests => error
 				puts error
 				sleep error.rate_limit.reset_in
+			rescue Twitter::Error => error
+				puts error
 			rescue NoMethodError => error
 				puts error
 			end
