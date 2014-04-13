@@ -112,6 +112,8 @@ end
 #twName = "kurtbusch3" 55K followers
 #twName = "BrianLVickers" #132K followers
 #fetch_all_followers(twName)
+		redis.del("followed_archive")
+
 followed_today = 0
 unfollowed_today = 0
 favorited_today = 0
@@ -167,7 +169,7 @@ while true do
 					redis.srem(twName, twUser)
 					redis.zadd("followed", Time.now.to_i, twUser)
 					#add to archive of all follows, so we don't follow and unfollow a user twice
-					redis.zadd("followed_archive", Time.now.to_i, twUser)
+					redis.sadd("followed_archive", Time.now.to_i, twUser)
 					#num_added += 1
 					sleep 80 + Random.new.rand(10..30)
 				end
@@ -241,10 +243,11 @@ while true do
 			if redis.zrank("favourited", tweet.id).nil?
 				twClient.favorite(tweet.id)
 				redis.zadd("favourited", Time.now.to_i, tweet.id)
+				puts "favorited!"
+				sleep Random.new.rand(40..60)
 			else
 				puts "Already favourited!"
 			end
-			puts "favorited!"
 			sleep Random.new.rand(1..4)
 		end
 		sleep 5
@@ -255,6 +258,7 @@ while true do
 	puts "total followed today #{followed_today}"
 	puts "total unfollowed today #{unfollowed_today}"
 	puts "total favorited today #{favorited_today}"
+	puts "---------------------------------------------------------------"
 	sleep Random.new.rand(900..1800) #3600 + Random.new.rand(300..1800)
 
 	if Time.now.to_i - 24*60*60 > start_time
