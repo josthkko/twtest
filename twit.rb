@@ -114,6 +114,7 @@ end
 #fetch_all_followers(twName)
 followed_today = 0
 unfollowed_today = 0
+favorited_today = 0
 start_time = Time.now.to_i
 while true do
 
@@ -194,7 +195,7 @@ while true do
 	num_old_follows = redis.zrangebyscore("followed", 0, Time.now.to_i - (3*24*60*60)).count
 	puts "#{num_old_follows} follows more than 3 days old found"
 	unfollowed_today = redis.zrangebyscore("unfollowed", Time.now.to_i - (24*60*60), Time.now.to_i).count
-	puts "Unfollowed today: #{}{unfollowed_today}"
+	puts "Unfollowed today: #{unfollowed_today}"
 	#the unfollowing part
 	if unfollowed_today < 40
 		#get people we are actually following
@@ -231,6 +232,24 @@ while true do
 	end
 	unfollowed_today += num_unfollowed
 	num_unfollowed = 0
+
+	#favourite some tweets
+	favorited_today = redis.zrangebyscore("favourited", Time.now.to_i - (24*60*60), Time.now.to_i).count
+	if favorited_today < 20 
+		twClient.search("soccer videogame", :result_type => "recent").take(10).each do |tweet|
+			puts "found tweet: #{tweet.text}"
+			if redis.zrank("favourited", tweet.id).nil?
+				twClient.favorite(tweet.id)
+				redis.zadd("favourited", Time.now.to_i, tweet.id)
+			else
+				puts "Already favourited!"
+			end
+			puts "favorited!"
+			sleep Random.new.rand(1..4)
+		end
+	else
+		puts "favourite limit reached for 24h!"
+	end
 
 	puts "total followed today #{followed_today}"
 	puts "total unfollowed today #{unfollowed_today}"
