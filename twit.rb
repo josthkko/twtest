@@ -126,8 +126,8 @@ while true do
 	redis = redis_client
 	twClient = twitter_client
 	
-	redis.del("followed_archive")
-	exit
+	#redis.del("followed_archive")
+	#exit
 	#puts redis.zrange("followed", 0, -1, :with_scores => true)
 	#exit
 	#puts redis.zrangebyscore("followed", 0, Time.now.to_i - (3*24*60*60), :with_scores => true)
