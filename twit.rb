@@ -126,8 +126,8 @@ while true do
 	redis = redis_client
 	twClient = twitter_client
 	
-	#redis.del("followed_archive")
-
+	redis.del("followed_archive")
+	exit
 	#puts redis.zrange("followed", 0, -1, :with_scores => true)
 	#exit
 	#puts redis.zrangebyscore("followed", 0, Time.now.to_i - (3*24*60*60), :with_scores => true)
@@ -179,6 +179,7 @@ while true do
 			rescue Twitter::Error => error
 				puts error
 			rescue Twitter::Error::TooManyRequests => error
+				puts error
 				sleep error.rate_limit.reset_in
 			rescue NoMethodError => error
 				puts error
