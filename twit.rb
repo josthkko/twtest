@@ -176,6 +176,10 @@ while true do
 					redis.sadd("followed_archive", twUser)
 					#num_added += 1
 					sleep 80 + Random.new.rand(10..30)
+				else
+					redis.srem(twName, twUser)
+					redis.sadd(twName + "_inactive", twUser)
+					puts "moved #{twUser} to #{twName}_inactive list"
 				end
 			rescue Twitter::Error::Unauthorized => error
 				puts error
