@@ -160,7 +160,7 @@ while true do
 			#check if his last tweet was recent (less than 2 dayz)
 			begin
 				puts "checking profile: #{twUser}"
-				sleep 3
+				sleep 6
 				last_tweet = twClient.user_timeline(twUser.to_i,{:count => 1}).to_a
 				posted_at = last_tweet[0].created_at.to_date
 				diff = (Date.today - posted_at).to_i
@@ -178,6 +178,8 @@ while true do
 				puts error
 			rescue Twitter::Error => error
 				puts error
+			rescue Twitter::Error::TooManyRequests => error
+				sleep error.rate_limit.reset_in
 			rescue NoMethodError => error
 				puts error
 			end
