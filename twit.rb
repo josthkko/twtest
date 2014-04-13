@@ -160,7 +160,7 @@ while true do
 	if followed_today < 90
 		#follow all users
 		redis.smembers(twName).each do |twUser, i|
-			#check if his last tweet was recent (less than 2 dayz)
+			#check if his last tweet was recent (less than 5 dayz)
 			begin
 				puts "checking profile: #{twUser}"
 				sleep 6
@@ -174,7 +174,7 @@ while true do
 					redis.zadd("followed", Time.now.to_i, twUser)
 					#add to archive of all follows, so we don't follow and unfollow a user twice
 					redis.sadd("followed_archive", twUser)
-					#num_added += 1
+					num_added += 1
 					sleep 80 + Random.new.rand(10..30)
 				else
 					redis.srem(twName, twUser)
