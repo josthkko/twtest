@@ -112,7 +112,6 @@ end
 #twName = "kurtbusch3" 55K followers
 #twName = "BrianLVickers" #132K followers
 #fetch_all_followers(twName)
-		redis.del("followed_archive")
 
 followed_today = 0
 unfollowed_today = 0
@@ -126,6 +125,8 @@ while true do
 
 	redis = redis_client
 	twClient = twitter_client
+	
+	redis.del("followed_archive")
 
 	#puts redis.zrange("followed", 0, -1, :with_scores => true)
 	#exit
