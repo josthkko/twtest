@@ -164,12 +164,15 @@ while true do
 			begin
 				puts "checking profile: #{twUser}"
 				sleep 6
-				last_tweet = twClient.user_timeline(twUser.to_i,{:count => 1}).to_a
-				posted_at = last_tweet[0].created_at.to_date
-				diff = (Date.today - posted_at).to_i
-				if diff < 5
+				#last_tweet = twClient.user_timeline(twUser.to_i,{:count => 1}).to_a
+				#posted_at = last_tweet[0].created_at.to_date
+				#diff = (Date.today - posted_at).to_i
+				#calculate diff between followers and following, we need users that are following more than they have followers
+				user = twClient.user(twUser.to_i)
+				diff = user.friends_count / (user.followers_count + 1)
+				if diff < 1
 					twClient.follow!(twUser.to_i)
-					puts "followed #{twUser}"
+					puts "followed #{twUser}, his ratio is #{diff}"
 					redis.srem(twName, twUser)
 					redis.zadd("followed", Time.now.to_i, twUser)
 					#add to archive of all follows, so we don't follow and unfollow a user twice
@@ -179,7 +182,7 @@ while true do
 				else
 					redis.srem(twName, twUser)
 					redis.sadd(twName + "_inactive", twUser)
-					puts "moved #{twUser} to #{twName}_inactive list"
+					puts "moved #{twUser} to #{twName}_inactive list, his ratio is #{diff}"
 				end
 			rescue Twitter::Error::Unauthorized => error
 				puts error
@@ -276,6 +279,7 @@ while true do
 	puts "total unfollowed today #{unfollowed_today}"
 	puts "total favorited today #{favorited_today}"
 	puts "---------------------------------------------------------------"
+	puts "Sleeping now...."
 	sleep Random.new.rand(900..1800) #3600 + Random.new.rand(300..1800)
 
 	if Time.now.to_i - 24*60*60 > start_time
