@@ -258,7 +258,7 @@ while true do
 	#favourite some tweets
 	favorited_today = redis.zrangebyscore("favourited", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	if favorited_today < 20 
-		twClient.search("soccer videogame", :result_type => "recent").take(10).each do |tweet|
+		twClient.search("soccer videogame", :result_type => "recent").take(30).each do |tweet|
 			puts "found tweet: #{tweet.text}"
 			if redis.zrank("favourited", tweet.id).nil?
 				twClient.favorite(tweet.id)
