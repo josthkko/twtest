@@ -219,7 +219,7 @@ while true do
 	unfollowed_today = redis.zrangebyscore("unfollowed", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	puts "Unfollowed today: #{unfollowed_today}"
 	#the unfollowing part
-	if unfollowed_today < 40
+	if unfollowed_today < 60
 		#get people we are actually following
 		redis.smembers("my_friends").each do |twUser|
 			if redis.zrank("followed", twUser).nil?
