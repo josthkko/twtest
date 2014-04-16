@@ -157,7 +157,7 @@ while true do
 	followed_today = redis.zrangebyscore("followed", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	puts "followed today: #{followed_today}"
 	num_added = 0
-	if followed_today < 90
+	if followed_today < 90 && false
 		#follow all users
 		redis.smembers(twName).each do |twUser, i|
 			#check if his last tweet was recent (less than 5 dayz)
