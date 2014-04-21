@@ -157,7 +157,7 @@ while true do
 	followed_today = redis.zrangebyscore("followed", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	puts "followed today: #{followed_today}"
 	num_added = 0
-	if followed_today < 90 && false
+	if followed_today < 90
 		#follow all users
 		redis.smembers(twName).each do |twUser, i|
 			#check if his last tweet was recent (less than 5 dayz)
@@ -214,7 +214,7 @@ while true do
 	fetch_all_followers()
 
 	num_unfollowed = 0
-	num_old_follows = redis.zrangebyscore("followed", 0, Time.now.to_i - (3*24*60*60)).count
+	num_old_follows = redis.zrangebyscore("followed", 0, Time.now.to_i - (5*24*60*60)).count
 	puts "#{num_old_follows} follows more than 3 days old found"
 	unfollowed_today = redis.zrangebyscore("unfollowed", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	puts "Unfollowed today: #{unfollowed_today}"
@@ -231,7 +231,7 @@ while true do
 
 		#check when have they been added, if older unfollow, but take care if he is following us
 		#start unfollowing after a few days
-		redis.zrangebyscore("followed_actual", 0, Time.now.to_i - (3*24*60*60)).each do |twUser|
+		redis.zrangebyscore("followed_actual", 0, Time.now.to_i - (5*24*60*60)).each do |twUser|
 			
 			if !redis.sismember("my_followers", twUser)
 				twClient.unfollow(twUser.to_i)
