@@ -169,8 +169,9 @@ while true do
 				#diff = (Date.today - posted_at).to_i
 				#calculate diff between followers and following, we need users that are following more than they have followers
 				user = twClient.user(twUser.to_i)
-				diff = user.friends_count / (user.followers_count + 1)
-				if diff > 1
+				users_friends = user.friends_count
+				diff = users_friends / (user.followers_count + 1)
+				if diff > 1 && users_friends > 50
 					twClient.follow!(twUser.to_i)
 					puts "followed #{twUser}, his ratio is #{diff}"
 					redis.srem(twName, twUser)
