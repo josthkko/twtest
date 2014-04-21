@@ -216,7 +216,7 @@ while true do
 
 	num_unfollowed = 0
 	num_old_follows = redis.zrangebyscore("followed", 0, Time.now.to_i - (5*24*60*60)).count
-	puts "#{num_old_follows} follows more than 3 days old found"
+	puts "#{num_old_follows} follows more than 5 days old found"
 	unfollowed_today = redis.zrangebyscore("unfollowed", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	puts "Unfollowed today: #{unfollowed_today}"
 	#the unfollowing part
@@ -259,7 +259,7 @@ while true do
 	#favourite some tweets
 	favorited_today = redis.zrangebyscore("favourited", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	if favorited_today < 20 
-		twClient.search("#gaming", :result_type => "recent").take(30).each do |tweet|
+		twClient.search("#gaming -$", :result_type => "recent").take(30).each do |tweet|
 			puts "found tweet: #{tweet.text}"
 			if redis.zrank("favourited", tweet.id).nil?
 				twClient.favorite(tweet.id)
