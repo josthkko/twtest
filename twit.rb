@@ -261,13 +261,17 @@ while true do
 	if favorited_today < 40 
 		twClient.search("#gaming -$ -%", :result_type => "recent").take(30).each do |tweet|
 			puts "found tweet: #{tweet.text}"
-			if redis.zrank("favourited", tweet.id).nil?
-				twClient.favorite(tweet.id)
-				redis.zadd("favourited", Time.now.to_i, tweet.id)
-				puts "favorited!"
-				sleep Random.new.rand(40..60)
+			if tweet.source == "web"
+				if redis.zrank("favourited", tweet.id).nil?
+					twClient.favorite(tweet.id)
+					redis.zadd("favourited", Time.now.to_i, tweet.id)
+					puts "favorited!"
+					sleep Random.new.rand(40..60)
+				else
+					puts "Already favourited!"
+				end
 			else
-				puts "Already favourited!"
+				puts "Tweet by a bot!"
 			end
 			sleep Random.new.rand(1..4)
 		end
