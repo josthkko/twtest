@@ -2,6 +2,8 @@ require 'twitter'
 require 'redis'
 require_relative 'conf'
 
+STDOUT.sync = true
+
 def twitter_client
   Twitter::REST::Client.new do |config|
 	  config.consumer_key        = $cons_key
@@ -171,7 +173,7 @@ while true do
 				user = twClient.user(twUser.to_i)
 				users_friends = user.friends_count
 				diff = users_friends / (user.followers_count + 1)
-				if diff > 1 && users_friends > 50
+				if diff > 1 && users_friends > 50 && diff < 20
 					twClient.follow!(twUser.to_i)
 					puts "followed #{twUser}, his ratio is #{diff}"
 					redis.srem(twName, twUser)
