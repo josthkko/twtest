@@ -159,7 +159,7 @@ while true do
 	followed_today = redis.zrangebyscore("followed", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	puts "followed today: #{followed_today}"
 	num_added = 0
-	if followed_today < 90
+	if followed_today < 110
 		#follow all users
 		redis.smembers(twName).each do |twUser, i|
 			#check if his last tweet was recent (less than 5 dayz)
@@ -217,12 +217,12 @@ while true do
 	fetch_all_followers()
 
 	num_unfollowed = 0
-	num_old_follows = redis.zrangebyscore("followed", 0, Time.now.to_i - (5*24*60*60)).count
-	puts "#{num_old_follows} follows more than 5 days old found"
+	num_old_follows = redis.zrangebyscore("followed", 0, Time.now.to_i - (10*24*60*60)).count
+	puts "#{num_old_follows} follows more than 10 days old found"
 	unfollowed_today = redis.zrangebyscore("unfollowed", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	puts "Unfollowed today: #{unfollowed_today}"
 	#the unfollowing part
-	if unfollowed_today < 70
+	if unfollowed_today < 120
 		#get people we are actually following
 		redis.smembers("my_friends").each do |twUser|
 			if redis.zrank("followed", twUser).nil?
@@ -237,12 +237,18 @@ while true do
 		redis.zrangebyscore("followed_actual", 0, Time.now.to_i - (5*24*60*60)).each do |twUser|
 			
 			if !redis.sismember("my_followers", twUser)
-				twClient.unfollow(twUser.to_i)
-				puts "unfollowed #{twUser}"
-				num_unfollowed += 1
-				redis.zrem("followed", twUser)
-				redis.zadd("unfollowed", Time.now.to_i, twUser)
-				sleep 80 + Random.new.rand(10..30)
+				begin
+					twClient.unfollow(twUser.to_i)
+					puts "unfollowed #{twUser}"
+					num_unfollowed += 1
+					redis.zrem("followed", twUser)
+					redis.zadd("unfollowed", Time.now.to_i, twUser)
+					sleep 80 + Random.new.rand(10..30)
+				rescue Twitter::Error::NotFound => error
+					puts error
+					redis.zrem("followed", twUser)
+					redis.zadd("unfollowed", Time.now.to_i, twUser)
+				end
 			else
 				puts "#{twUser} is my follower and I won't unfollow him"
 			end
@@ -260,7 +266,7 @@ while true do
 
 	#favourite some tweets
 	favorited_today = redis.zrangebyscore("favourited", Time.now.to_i - (24*60*60), Time.now.to_i).count
-	if favorited_today < 40 
+	if favorited_today < 80 
 		twClient.search("#gaming -$ -%", :result_type => "recent").take(30).each do |tweet|
 			puts "found tweet: #{tweet.text}"
 			if tweet.source == "web"
@@ -277,7 +283,25 @@ while true do
 			end
 			sleep Random.new.rand(1..4)
 		end
-		sleep 5
+		sleep Random.new.rand(5..10)
+		#just duplicate from above -> put in function
+		twClient.search("soccer OR football", :result_type => "recent").take(30).each do |tweet|
+			puts "found tweet: #{tweet.text}"
+			if tweet.source == "web"
+				if redis.zrank("favourited", tweet.id).nil?
+					twClient.favorite(tweet.id)
+					redis.zadd("favourited", Time.now.to_i, tweet.id)
+					puts "favorited!"
+					sleep Random.new.rand(40..60)
+				else
+					puts "Already favourited!"
+				end
+			else
+				puts "Tweet by a bot!"
+			end
+			sleep Random.new.rand(1..4)
+		end
+		sleep Random.new.rand(5..10)
 	else
 		puts "favourite limit reached for 24h!"
 	end
