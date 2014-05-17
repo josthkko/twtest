@@ -159,7 +159,7 @@ while true do
 	followed_today = redis.zrangebyscore("followed", Time.now.to_i - (24*60*60), Time.now.to_i).count
 	puts "followed today: #{followed_today}"
 	num_added = 0
-	if followed_today < 110
+	if followed_today < 80
 		#follow all users
 		redis.smembers(twName).each do |twUser, i|
 			#check if his last tweet was recent (less than 5 dayz)
@@ -197,6 +197,9 @@ while true do
 				sleep error.rate_limit.reset_in
 			rescue Twitter::Error => error
 				puts error
+				redis.srem(twName, twUser)
+				redis.sadd(twName + "_inactive", twUser)
+				puts "moved #{twUser} to #{twName}_inactive list"
 			rescue NoMethodError => error
 				puts error
 				redis.srem(twName, twUser)
